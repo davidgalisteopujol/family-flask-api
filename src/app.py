@@ -15,6 +15,27 @@ CORS(app)
 # create the jackson family object
 jackson_family = FamilyStructure("Jackson")
 
+jackson_family.add_member({
+                "first_name": "John",
+                "last_name": "Jackson",
+                "age": 33,
+                "lucky_numbers": [7, 13, 22]
+            })
+
+jackson_family.add_member({
+                "first_name": "Jane",
+                "last_name": "Jackson",
+                "age": 35,
+                "lucky_numbers": [10, 14, 3]
+            })
+
+jackson_family.add_member({
+                "first_name": "Jimmy",
+                "last_name": "Jackson",
+                "age": 5,
+                "lucky_numbers": [1]
+            })
+        
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -28,43 +49,52 @@ def sitemap():
 
 @app.route('/members', methods=['GET'])
 def get_members():
+
     # this is how you can use the Family datastructure by calling its methods
     members = jackson_family.get_all_members()
-    response_body = {
-        "family": members
-    }
-    return jsonify(response_body), 200
+    # response_body = {
+    #     "family": members
+    # }
 
+    # return jsonify(response_body), 200
+    return jsonify(members)
 
 @app.route('/member/<int:member_id>', methods=['GET'])
-def get_single_member(member_id):
+def get_one_member(member_id):
+
+    # this is how you can use the Family datastructure by calling its methods
     member = jackson_family.get_member(member_id)
+    response_body = member
+    if (member):
+        return jsonify(response_body), 200
+    else:
+        return "fallo en la solicitud", 400
+
+@app.route('/member', methods=['POST'])
+def add_member():
+
+    # this is how you can use the Family datastructure by calling its methods
+    print(request.json)
+    infomember = request.json
+    newMember = jackson_family.add_member(infomember)
     response_body = {
-    "family": member
+        "family": newMember
     }
+
     return jsonify(response_body), 200
-
-
-@app.route('/member/<int:member_id>', methods=['POST'])
-def post_single_member(member_id):
-    body = request.get_json()
-    member = {
-    "id":member_id,
-    "first_name": body["first_name"],
-    "age":body["age"],
-    "lucky_numbers": body["lucky_numbers"]
-    }
-    new_member = jackson_family.add_member(member)
-    return jsonify({"message":"New member added "}),200
-
 
 @app.route('/member/<int:member_id>', methods=['DELETE'])
-def delete_single_member(member_id):
-    member = jackson_family.delete_member(member_id)
-    response_body = {
-    "Message":"Member deleted"
-    }
-    return jsonify(response_body), 200
+def delete_member(member_id):
+
+    # this is how you can use the Family datastructure by calling its methods
+    sinpersona = jackson_family.delete_member(member_id)
+    if sinpersona:
+        response_body = {
+        "done": True
+        }
+        return jsonify(response_body), 200
+    
+    return "error en la solicitud",400
     
 
 # this only runs if `$ python src/app.py` is executed
